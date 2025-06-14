@@ -92,7 +92,7 @@ const Dashboard = () => {
     : null;
   console.log(nearestPreviousDate);
   const addArmsData = async () => {
-    const response = await axios.post("https://military-asset-be.onrender.com/base/addarmsdata", {
+    const response = await axios.post("https://military-asset-be-1.onrender.com/base/addarmsdata", {
       basename: base.basename,
       date: formattedSelectedDate,
       query: nearestPreviousDate.arms

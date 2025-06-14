@@ -18,7 +18,7 @@ const App = () => {
           return;
         }
 
-        const response = await axios.get("https://military-asset-be.onrender.com/base/getbasedata", {
+        const response = await axios.get("https://military-asset-be-1.onrender.com/base/getbasedata", {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem("token")}`
           }
@@ -28,7 +28,7 @@ const App = () => {
           setBase(response.data.base);
         }
 
-        const userResponse = await axios.get("https://military-asset-be.onrender.com/user/getuser", {
+        const userResponse = await axios.get("https://military-asset-be-1.onrender.com/user/getuser", {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem("token")}`
           }

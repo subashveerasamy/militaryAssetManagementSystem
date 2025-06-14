@@ -30,7 +30,7 @@ const Reports = () => {
 
   const handleReqAp = (data) => {
     const reqApp = async (data) => {
-      const response = await axios.put("https://military-asset-be.onrender.com/base/updatetransactionfromrequesting", {
+      const response = await axios.put("https://military-asset-be-1.onrender.com/base/updatetransactionfromrequesting", {
         id: data._id,
         requesting_base: data.requesting_base,
         receiving_base: data.receiving_base,

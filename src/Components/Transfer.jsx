@@ -98,7 +98,7 @@ const Transfer = () => {
         .filter(item => item !== null);
 
       const newTransaction = async () => {
-        const response = await axios.post("https://military-asset-be.onrender.com/base/newtransaction", {
+        const response = await axios.post("https://military-asset-be-1.onrender.com/base/newtransaction", {
           requesting_base: fromBase,
           receiving_base: toBase,
           movement_type: movement,

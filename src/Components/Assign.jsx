@@ -158,7 +158,7 @@ const Assign = () => {
         onSubmit={async (values, {resetForm}) => {
           try {
             if (values.quantity > 0 && values.soldier_serial > 0) {
-              const response = await axios.post("https://military-asset-be.onrender.com/base/assignarms", {
+              const response = await axios.post("https://military-asset-be-1.onrender.com/base/assignarms", {
                 arm_name: values.arm_name,
                 specific_name: values.specific_name,
                 soldier_serial: values.soldier_serial,
@@ -380,7 +380,7 @@ const Assign = () => {
                     <button className="btn btn-primary" onClick={(e) => {
                       e.preventDefault();
                       const getassigneddata = async () => {
-                        const response = await axios.get("https://military-asset-be.onrender.com/base/getassigneddata", {
+                        const response = await axios.get("https://military-asset-be-1.onrender.com/base/getassigneddata", {
                           params: {
                             soldier_serial: serial,
                             basename: user.base
@@ -499,7 +499,7 @@ const Assign = () => {
               <button className="btn btn-primary" type="submit" onClick={(e)=>{
                 e.preventDefault();
                   const addExpenditure= async()=>{
-                    const response= await axios.put("https://military-asset-be.onrender.com/base/expenditure",{
+                    const response= await axios.put("https://military-asset-be-1.onrender.com/base/expenditure",{
                       soldier_serial:serial,
                       specific_name:selectedData,
                       expenditure,
