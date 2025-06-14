@@ -46,7 +46,7 @@ const Login = () => {
 
     <div className='d-flex flex-column justify-content-center align-items-center' id='loginPage' style={{ width: "100vw", height: "100vh", backgroundImage: `url('/loginBg1.jpg')`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }} >
       <form className='border border-5 p-5' onSubmit={handleSubmit} style={{ borderRadius: "25px", backdropFilter: "blur(3px)", cursor: "pointer" }}>
-        <h1 className='text-center text-light'>LOGIN PAGE</h1>
+        <h1 className='text-center text-light'>LOGIN</h1>
 
         <div
           className="usernameDiv mt-5"
@@ -139,7 +139,7 @@ const Login = () => {
 
         </div>
         <div className="mt-5 ">
-          <Link className='text-light' to="/resetpassword" >forgot Password?</Link>
+          <Link className='text-light' to="/resetpassword"  >forgot Password?</Link>
         </div>
         <div className="d-flex justify-content-evenly mt-5">
 

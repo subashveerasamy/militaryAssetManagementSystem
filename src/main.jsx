@@ -10,6 +10,8 @@ import Purchase from './Components/Purchase.jsx';
 import Transfer from './Components/Transfer.jsx';
 import Assign from './Components/Assign.jsx';
 import Reports from './Components/Reports.jsx';
+import ResetPassword from './Components/ResetPassword.jsx';
+import CreateNewPassword from './Components/CreateNewPassword.jsx';
 
 
 const router = createBrowserRouter([
@@ -17,10 +19,14 @@ const router = createBrowserRouter([
         path: "/",
         element: <Login />
     },
-    // {
-    //     path:"/resetpassword",
-    //     element:<ResetPassword/>
-    // },
+    {
+        path:"/resetpassword",
+        element:<ResetPassword/>
+    },
+    {
+        path:"/newpassword/:username",
+        element:<CreateNewPassword/>
+    },
     {
         path: "/app",
         element: <App />,

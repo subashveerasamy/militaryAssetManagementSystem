@@ -22,7 +22,7 @@ const NavBar = () => {
       <div className="d-flex justify-content-around align-items-center" style={{ width: "35%" }}>
         <div className='p-2' onClick={() => setNavig("app/assign")} style={{ borderBottom: navig === "assign" ? "5px solid white" : "none", borderRadius: "25%" }}>A & E</div>
         <div className='p-2' onClick={() => setNavig("app/reports")}>Reports</div>
-        <div className='p-2'> Log Out</div>
+        <div className='p-2' onClick={()=>  {sessionStorage.removeItem('token'); setNavig("")}}> Log Out</div>
       </div>
     </div>
   )
