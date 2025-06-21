@@ -2,7 +2,7 @@ import * as React from 'react';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClone, faCopy } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BaseContext from '../Context/BaseContext.jsx';
 import Box from '@mui/material/Box';
 import InputLabel from '@mui/material/InputLabel';
@@ -15,17 +15,29 @@ import { DatePicker } from '@mui/x-date-pickers-pro';
 import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers-pro/LocalizationProvider';
 import dayjs from 'dayjs';
-import { add, format } from 'date-fns';
 import UserContext from '../Context/UserContext.jsx';
+import BaseDataContext from '../Context/BaseDataContext.jsx';
+import currentBaseContext from '../Context/CurrentBaseContect.jsx';
 
 
 const Dashboard = () => {
   const [merge, setMerge] = useState(false);
   const { base, setBase } = React.useContext(BaseContext);
   const { user, setUser } = React.useContext(UserContext);
-
+  const { fetchBase, setFetchBase } = React.useContext(BaseDataContext);
   const [selectedDate, setSelectedDate] = React.useState(dayjs());
-  const [selectBase, setSelectBase] = React.useState(user.base);
+  const { selectBase, setSelectBase } = React.useContext(currentBaseContext);
+  const [netMovementDetails, setNetMovementdetails] = useState(false);
+  const [transaction, setTransaction] = useState();
+  const [selectedData, setSelectedData] = useState();
+  const [itemBtn, setItemBtn] = useState(false);
+
+  useEffect(() => {
+    const baseObj = user.role === "admin" ? fetchBase.find(item => item.basename === selectBase) : fetchBase;
+    if (baseObj !== base) {
+      setBase(baseObj || null);
+    }
+  }, [selectBase])
 
   const baseNames = user.role === 'admin' ? ([
     'Fort Titan', 'Echo Command', 'Sentinel Base', 'Ironclad Depot', 'Vanguard Station',
@@ -39,9 +51,17 @@ const Dashboard = () => {
     setSelectBase(event.target.value);
 
   };
+  useEffect(() => {
+    const date = dayjs(selectedDate).format("YYYY-MM-DD")
+    setTransaction(base.transaction.filter((item) => item.completion_date == date));
+
+  }, [base.transaction, selectedDate]);
+  useEffect(() => {
+
+  }, [selectedData])
 
 
-  console.log(base);
+
   const assetNames = [
     'Helicopter', 'Rifle', 'Ammo', 'Grenade', 'Tank', 'Radar', 'Jet_Fighter',
     'Aircraft_Carrier', 'Missile_Launcher', 'Submarine', 'Body_Armor', 'Artillery_Cannon',
@@ -84,21 +104,29 @@ const Dashboard = () => {
   const previousDate = dayjs(selectedDate).subtract(1, "day").format("YYYY-MM-DD");
 
   const armsData = base.arms_data;
-  console.log(formattedSelectedDate);
+
 
   const availableDates = armsData.filter(item => item.date < formattedSelectedDate);
   const nearestPreviousDate = availableDates.length > 0
     ? availableDates.sort((a, b) => dayjs(b.date).diff(dayjs(a.date)))[0]
     : null;
-  console.log(nearestPreviousDate);
+
   const addArmsData = async () => {
-    const response = await axios.post("https://military-asset-be-1.onrender.com/base/addarmsdata", {
+    const response = await axios.post("https://military-asset-be.onrender.com/base/addarmsdata", {
       basename: base.basename,
       date: formattedSelectedDate,
       query: nearestPreviousDate.arms
     });
     if (response.data.base) {
       setBase(response.data.base);
+      setFetchBase(fetchBase.map((it) => {
+        if (it.basename === base.basename) {
+          return response.data.base
+        }
+        else {
+          return it
+        }
+      }))
     }
   };
 
@@ -135,13 +163,10 @@ const Dashboard = () => {
 
 
 
-
-  console.log(openingBalance)
-  console.log(closingBalance);
   const netMovement = transferOutNetMovement.map((value, index) =>
     (purchaseNetMovement[index] || 0) + (transferInNetMovement[index] || 0) - (value || 0)
   );
-  console.log(netMovement)
+
   const netSeries = [
     {
       label: 'Net Movement',
@@ -165,7 +190,7 @@ const Dashboard = () => {
                 onChange={(newValue) => {
                   if (newValue) {
                     const formattedDate = newValue.format("YYYY-MM-DD");
-                    const today = dayjs().format("YYYY-MM-DD"); // Define `today` here
+                    const today = dayjs().format("YYYY-MM-DD");
 
 
                     if (formattedDate <= today) {
@@ -291,10 +316,107 @@ const Dashboard = () => {
                 }
               }]}
             />
+            <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", cursor: "pointer" }} onClick={() => setNetMovementdetails(true)}>
+              <div className='p-2 btn btn-primary'>More </div>
+            </div>
           </div>
         </div>
 
       </div>
+      {
+        netMovementDetails ? (
+          <div style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.5)",
+            backdropFilter: "blur(5px)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }} >
+            <div style={{
+              background: "white",
+              padding: "20px",
+              boxShadow: "0px 4px 10px rgba(0,0,0,0.3)",
+              borderRadius: "8px"
+            }}>
+              <div className='p-3 ' style={{ maxWidth: "90vw", overflowX: "auto", maxHeight: "70vh", border: "2px solid black" }}>
+                <table className="custom-table" style={{ width: "100%" }}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: "100px" }} >From</th>
+                      <th style={{ width: "100px" }} >To</th>
+                      <th style={{ width: "100px" }} >Movement</th>
+                      <th style={{ width: "100px" }} >Item Details</th>
+                      <th style={{ width: "100px" }} >Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {
+                      transaction.length > 0 ? (transaction.slice().reverse().map((data, index) => (
+                        <tr key={index}>
+                          <td>{data.requesting_base}</td>
+                          <td>{data.receiving_base}</td>
+                          <td>{data.movement_type}</td>
+                          <td> <p className='reportsItem' onClick={() => { setSelectedData(data); setItemBtn(true) }}>
+                            {data.item_details.map(item => `${item.specific_name} - ${item.quantity} Nos`).join(", ")}
+                          </p>
+                          </td>
+
+                          <td>{data.status}</td>
+                        </tr>
+                      )
+
+                      )) : null
+                    }
+                  </tbody>
+
+                </table>
+
+              </div>
+              <div className='m-3 text-end'>
+                <div className="btn btn-danger" onClick={() => setNetMovementdetails(false)}>close</div>
+              </div>
+            </div>
+
+          </div>
+        ) : null
+      }
+      {itemBtn && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0,0,0,0.5)",
+          backdropFilter: "blur(5px)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }} >
+
+          <div style={{
+            background: "white",
+            padding: "20px",
+            boxShadow: "0px 4px 10px rgba(0,0,0,0.3)",
+            borderRadius: "8px"
+          }} onClick={(e) => e.stopPropagation()}>
+
+            {selectedData.item_details.map((item, index) => (
+              <p key={index}>{item.specific_name} - {item.quantity} Nos</p>
+
+            ))}
+            <div className="mt-2 d-flex justify-content-center align-items-center">
+              <button className="p-2 btn btn-danger" onClick={() => setItemBtn(false)}>Close</button>
+            </div>
+          </div>
+
+        </div>
+      )}
     </div>
   );
 };

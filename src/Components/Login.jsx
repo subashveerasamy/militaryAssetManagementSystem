@@ -22,7 +22,7 @@ const Login = () => {
   const loginUser = async () => {
     try {
 
-      const response = await axios.post("https://military-asset-be-1.onrender.com/user/userlogin", { username, password });
+      const response = await axios.post("https://military-asset-be.onrender.com/user/userlogin", { username, password });
       if (response.data.message === "Successfully Login") {
 
 

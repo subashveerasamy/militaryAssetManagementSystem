@@ -9,6 +9,7 @@ import Select from "@mui/material/Select";
 import BaseContext from "../Context/BaseContext";
 import UserContext from "../Context/UserContext";
 import axios from "axios";
+import BaseDataContext from "../Context/BaseDataContext";
 const arm_nameNames = [
   "Helicopter",
   "Rifle",
@@ -115,20 +116,22 @@ const validationSchema = Yup.object().shape({
 const Assign = () => {
   const { base, setBase } = useContext(BaseContext);
   const { user, setUser } = useContext(UserContext);
+  const { fetchBase, setFetchBase } = useContext(BaseDataContext);
+
   const [expenditure, setExpenditure] = useState();
   const [reason, setReason] = useState('');
   const [serial, setSerial] = useState(0);
   const [assignedData, setAssignedData] = useState([]);
   const [selectedData, setSelectedData] = useState({});
   useEffect(() => {
-    console.log(assignedData)
+
   }, [assignedData, selectedData])
 
 
   return (
-    <div className="assign" style={{backgroundImage:`url("/assignBg.jpg")`, backgroundRepeat:"no-repeat", backgroundSize:"cover"}}>
+    <div className="assign" style={{ backgroundImage: `url("/assignBg.jpg")`, backgroundRepeat: "no-repeat", backgroundSize: "cover" }}>
       <style>
-    {`
+        {`
       .assign {
         display: flex;
         justify-content: space-between;
@@ -141,7 +144,7 @@ const Assign = () => {
         }
       }
     `}
-  </style>
+      </style>
 
 
       <Formik
@@ -155,10 +158,10 @@ const Assign = () => {
           remarks: "",
         }}
         validationSchema={validationSchema}
-        onSubmit={async (values, {resetForm}) => {
+        onSubmit={async (values, { resetForm }) => {
           try {
             if (values.quantity > 0 && values.soldier_serial > 0) {
-              const response = await axios.post("https://military-asset-be-1.onrender.com/base/assignarms", {
+              const response = await axios.post("https://military-asset-be.onrender.com/base/assignarms", {
                 arm_name: values.arm_name,
                 specific_name: values.specific_name,
                 soldier_serial: values.soldier_serial,
@@ -168,8 +171,23 @@ const Assign = () => {
                 assign_remarks: values.remarks,
                 basename: user.base
               });
+              if (response.data.message === "Successfully Assigned!") {
+                setBase(response.data.base);
+                setFetchBase(fetchBase.map((it) => {
+                  if (it.basename === base.basename) {
+                    return response.data.base
+                  }
+                  else {
+                    return it
+                  }
+                }))
 
-              console.log("Form Submitted Successfully:", response.data);
+              }
+              if (response.data.message === "Insufficient arms available") {
+                alert("Insufficient arms")
+              }
+
+
               resetForm();
             } else {
               if (values.quantity < 1) {
@@ -186,9 +204,9 @@ const Assign = () => {
       >
         {({ values, handleChange, setFieldValue, errors, touched, handleSubmit }) => (
           <div className="d-flex justify-content-center w-100" >
-            <Form onSubmit={handleSubmit} className=" m-5 text-light d-flex justify-content-center align-items-center p-4 w-50" style={{backdropFilter:"blur(3px)", border:"2px solid white", borderRadius:"25px"}}>
+            <Form onSubmit={handleSubmit} className=" m-5 text-light d-flex justify-content-center align-items-center p-4 w-50" style={{ backdropFilter: "blur(3px)", border: "2px solid white", borderRadius: "25px" }}>
 
-           
+
 
               <div >
 
@@ -234,12 +252,12 @@ const Assign = () => {
                   <label >
                     Arms Name :
                     <Box sx={{ minWidth: 250, marginTop: "10px" }}>
-                      <FormControl fullWidth sx={{color:"white"}}>
-                        <InputLabel sx={{color:"white"}}>Select Arms</InputLabel>
+                      <FormControl fullWidth sx={{ color: "white" }}>
+                        <InputLabel sx={{ color: "white" }}>Select Arms</InputLabel>
                         <Select
                           name="arm_name"
                           value={values.arm_name}
-                          sx={{color:"white"}}
+                          sx={{ color: "white" }}
                           onChange={(event) => {
                             handleChange(event);
                             setFieldValue("specific_name", "");
@@ -262,14 +280,14 @@ const Assign = () => {
                 <div className="mb-4">
                   <label >
                     Specific Name :
-                    <Box sx={{ minWidth: 250, marginTop: "10px", color:"white" }}>
-                      <FormControl fullWidth sx={{color:"white"}}>
-                        <InputLabel sx={{color:"white"}}>Specify Arms</InputLabel>
+                    <Box sx={{ minWidth: 250, marginTop: "10px", color: "white" }}>
+                      <FormControl fullWidth sx={{ color: "white" }}>
+                        <InputLabel sx={{ color: "white" }}>Specify Arms</InputLabel>
                         <Select
                           name="specific_name"
                           value={values.specific_name}
                           onChange={handleChange}
-                           sx={{color:"white"}}
+                          sx={{ color: "white" }}
                         >
                           {values.arm_name &&
                             assetNames[values.arm_name]?.map((name, index) => (
@@ -349,7 +367,7 @@ const Assign = () => {
       </Formik>
 
       <div className="d-flex justify-content-center w-100">
-        <form className=" m-5  text-light d-flex justify-content-center align-items-center w-50" style={{backdropFilter:"blur(3px)", border:"2px solid white", borderRadius:"25px"}}>
+        <form className=" m-5  text-light d-flex justify-content-center align-items-center w-50" style={{ backdropFilter: "blur(3px)", border: "2px solid white", borderRadius: "25px" }}>
 
 
 
@@ -380,7 +398,7 @@ const Assign = () => {
                     <button className="btn btn-primary" onClick={(e) => {
                       e.preventDefault();
                       const getassigneddata = async () => {
-                        const response = await axios.get("https://military-asset-be-1.onrender.com/base/getassigneddata", {
+                        const response = await axios.get("https://military-asset-be.onrender.com/base/getassigneddata", {
                           params: {
                             soldier_serial: serial,
                             basename: user.base
@@ -417,37 +435,37 @@ const Assign = () => {
 
               </label>
             </div>
-            
+
 
             <div className="mb-4">
               <label >
                 Specific Name :
-                <Box sx={{ minWidth: 250, marginTop: "10px" , color:"white"}}>
-                  <FormControl fullWidth sx={{color:"white"}}>
-                    <InputLabel sx={{color:"white"}}>Specify Arms</InputLabel>
+                <Box sx={{ minWidth: 250, marginTop: "10px", color: "white" }}>
+                  <FormControl fullWidth sx={{ color: "white" }}>
+                    <InputLabel sx={{ color: "white" }}>Specify Arms</InputLabel>
                     <Select
-  name="specific_name"
-  sx={{
-    width: "330px", 
-    color: "white",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis", 
-  }}
-  value={selectedData?.specific_name || ""}
-  onChange={(event) => {
-    const selectedObject = assignedData.find(
-      (item) => item.specific_name === event.target.value
-    );
-    setSelectedData(selectedObject);
-  }}
->
-  {assignedData.map((name, index) => (
-    <MenuItem key={index} value={name.specific_name || ""} sx={{ maxWidth: "200px" }}>
-      {name?.specific_name || ""}
-    </MenuItem>
-  ))}
-</Select>
+                      name="specific_name"
+                      sx={{
+                        width: "330px",
+                        color: "white",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                      value={selectedData?.specific_name || ""}
+                      onChange={(event) => {
+                        const selectedObject = assignedData.find(
+                          (item) => item.specific_name === event.target.value
+                        );
+                        setSelectedData(selectedObject);
+                      }}
+                    >
+                      {assignedData.map((name, index) => (
+                        <MenuItem key={index} value={name.specific_name || ""} sx={{ maxWidth: "200px" }}>
+                          {name?.specific_name || ""}
+                        </MenuItem>
+                      ))}
+                    </Select>
 
                   </FormControl>
                 </Box>
@@ -496,21 +514,29 @@ const Assign = () => {
             </div>
 
             <div className="d-flex justify-content-center align-items-center w-100">
-              <button className="btn btn-primary" type="submit" onClick={(e)=>{
+              <button className="btn btn-primary" type="submit" onClick={(e) => {
                 e.preventDefault();
-                  const addExpenditure= async()=>{
-                    const response= await axios.put("https://military-asset-be-1.onrender.com/base/expenditure",{
-                      soldier_serial:serial,
-                      specific_name:selectedData,
-                      expenditure,
-                      reason_for_expenditure: reason,
-                      basename:user.base
-                    })
-                    if(response.data.base){
-                      setBase(response.data.base);
-                    }
+                const addExpenditure = async () => {
+                  const response = await axios.put("https://military-asset-be.onrender.com/base/expenditure", {
+                    soldier_serial: serial,
+                    specific_name: selectedData,
+                    expenditure,
+                    reason_for_expenditure: reason,
+                    basename: user.base
+                  })
+                  if (response.data.base) {
+                    setBase(response.data.base);
+                    setFetchBase(fetchBase.map((it) => {
+                      if (it.basename === base.basename) {
+                        return response.data.base
+                      }
+                      else {
+                        return it
+                      }
+                    }))
                   }
-                  addExpenditure();
+                }
+                addExpenditure();
               }} variant="contained" color="primary" >
                 Submit
               </button>

@@ -48,80 +48,80 @@ const ResetPassword = () => {
 
     const resetPassword = async () => {
         const username = params.username;
-        const response = await axios.put("https://military-asset-be-1.onrender.com/user/resetPassword", { username, password });
+        const response = await axios.put("https://military-asset-be.onrender.com/user/resetPassword", { username, password });
         alert(response.data.message);
         if (response.data.message === "Password updated successfully") {
             navigate('/');
         }
-        else{
+        else {
             alert('User not found')
         }
     }
 
     return (
-        <div className='d-flex text-light flex-column justify-content-center align-items-center' id="passwordReset" style={{ width: "100vw", height:"100vh",  backgroundImage: `url('/loginBg1.jpg')`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat"}}>
-            <form className='border border-5 p-5' onSubmit={handleSubmit} style={{ borderRadius: "25px", backdropFilter:"blur(5px)" }}>
+        <div className='d-flex text-light flex-column justify-content-center align-items-center' id="passwordReset" style={{ width: "100vw", height: "100vh", backgroundImage: `url('/loginBg1.jpg')`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}>
+            <form className='border border-5 p-5' onSubmit={handleSubmit} style={{ borderRadius: "25px", backdropFilter: "blur(5px)" }}>
                 <h1 className="text-center text-light">Reset Password</h1>
-                <div className="passwordDiv mt-5" 
-                style={{
-          position: "relative",
-          border: "none",
-          outline: "none",
-          borderBottom: "2px solid white"
-        }}>
-             <span style={{
-            position: "absolute",
-            right: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-          }}><FontAwesomeIcon icon={faLock} style={{ color: "white", marginRight: "10px" }} /></span>
+                <div className="passwordDiv mt-5"
+                    style={{
+                        position: "relative",
+                        border: "none",
+                        outline: "none",
+                        borderBottom: "2px solid white"
+                    }}>
+                    <span style={{
+                        position: "absolute",
+                        right: "10px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                    }}><FontAwesomeIcon icon={faLock} style={{ color: "white", marginRight: "10px" }} /></span>
                     <label className="text-light" id="passwordLabel" style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", transition: "0.3s ease-in-out" }}>New password</label>
                     <input className=" mt-3" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                    style={{
-              border: "none",
-              outline: "none",
-              backgroundColor: "transparent",
-              color: "#fff",
-            }}
-            onFocus={(e) => document.getElementById("passwordLabel").style.top = "-10px"}
-            onBlur={(e) => {
-              if (!e.target.value) document.getElementById("passwordLabel").style.top = "50%";
-            }}
-                    required />
-                    
+                        style={{
+                            border: "none",
+                            outline: "none",
+                            backgroundColor: "transparent",
+                            color: "#fff",
+                        }}
+                        onFocus={(e) => document.getElementById("passwordLabel").style.top = "-10px"}
+                        onBlur={(e) => {
+                            if (!e.target.value) document.getElementById("passwordLabel").style.top = "50%";
+                        }}
+                        required />
+
                 </div>
-               {errors.length && <p className="text-danger">{errors.length}</p>}
-                    {errors.uppercase && <p className="text-danger">{errors.uppercase}</p>}
-                    {errors.lowercase && <p className="text-danger">{errors.lowercase}</p>}
-                    {errors.number && <p className="text-danger">{errors.number}</p>}
-                    {errors.specialChar && <p className="text-danger">{errors.specialChar}</p>}
-               
-               
+                {errors.length && <p className="text-danger">{errors.length}</p>}
+                {errors.uppercase && <p className="text-danger">{errors.uppercase}</p>}
+                {errors.lowercase && <p className="text-danger">{errors.lowercase}</p>}
+                {errors.number && <p className="text-danger">{errors.number}</p>}
+                {errors.specialChar && <p className="text-danger">{errors.specialChar}</p>}
+
+
                 <div className="passwordDiv mt-5" style={{
-          position: "relative",
-          border: "none",
-          outline: "none",
-          borderBottom: "2px solid white"
-        }}>
-            <span style={{
-            position: "absolute",
-            right: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-          }}><FontAwesomeIcon icon={faLock} style={{ color: "white", marginRight: "10px" }} /></span>
+                    position: "relative",
+                    border: "none",
+                    outline: "none",
+                    borderBottom: "2px solid white"
+                }}>
+                    <span style={{
+                        position: "absolute",
+                        right: "10px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                    }}><FontAwesomeIcon icon={faLock} style={{ color: "white", marginRight: "10px" }} /></span>
                     <label className="text-light" id="confirmPassword" style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", transition: "0.3s ease-in-out" }}>Confirm password</label>
                     <input className=" mt-3" type="password" name="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                     style={{
-              border: "none",
-              outline: "none",
-              backgroundColor: "transparent",
-              color: "#fff",
-            }}
-            onFocus={(e) => document.getElementById("confirmPassword").style.top = "-10px"}
-            onBlur={(e) => {
-              if (!e.target.value) document.getElementById("confirmPassword").style.top = "50%";
-            }}
-                required />
+                        style={{
+                            border: "none",
+                            outline: "none",
+                            backgroundColor: "transparent",
+                            color: "#fff",
+                        }}
+                        onFocus={(e) => document.getElementById("confirmPassword").style.top = "-10px"}
+                        onBlur={(e) => {
+                            if (!e.target.value) document.getElementById("confirmPassword").style.top = "50%";
+                        }}
+                        required />
                 </div>
                 <div className="text-center mt-5">
                     <button className="btn btn-primary" type='submit'>Submit</button>

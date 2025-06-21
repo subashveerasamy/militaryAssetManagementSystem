@@ -3,35 +3,31 @@ import BaseContext from '../Context/BaseContext'
 import UserContext from '../Context/UserContext';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFilter } from '@fortawesome/free-solid-svg-icons';
-import Box from '@mui/material/Box';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
+import { faFilter, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { DatePicker } from '@mui/x-date-pickers-pro';
 import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers-pro/LocalizationProvider';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 import BaseDataContext from '../Context/BaseDataContext';
-import currentBaseContext from '../Context/CurrentBaseContect';
 const Reports = () => {
   const { base, setBase } = useContext(BaseContext);
   const { user, setUser } = useContext(UserContext);
   const { fetchBase, setFetchBase } = useContext(BaseDataContext);
+  const [approval, setApproval] = useState();
+  const [key, setKey] = useState();
+  const [selectedData, setSelectedData] = useState(null);
   const [remarkBtn, setRemarkBtn] = useState();
-  const [selectedData, setSelectedData] = useState();
   const [itemBtn, setItemBtn] = useState();
   const [remarks, setRemarks] = useState();
   const [filter, setFilter] = useState(false);
   const [selectedFromDate, setSelectedFromDate] = React.useState(dayjs().format("YYYY-MM-DD"));
   const [selectedToDate, setSelectedToDate] = React.useState(dayjs().format("YYYY-MM-DD"));
-  const { selectBase, setSelectBase } = useContext(currentBaseContext);
 
   const [filterData, setFilterData] = useState({
     from: [],
     to: [],
-    movement: [],
+    movement: ['purchase'],
     fromApproval: [],
     toApproval: [],
     initiationDate: [],
@@ -45,28 +41,10 @@ const Reports = () => {
     'Warhound Keep', 'Crossfire Station', 'Blackstone Bunker', 'Delta Sentinel', 'Legion Hold',
     'Cerberus Outpost', 'Fort Resolute', 'Ironwing Command', 'Helix Forward Base', 'Striker Point'
   ]) : [user.base];
-  const baseNamesFilter = [
-    'Fort Titan', 'Echo Command', 'Sentinel Base', 'Ironclad Depot', 'Vanguard Station',
-    'Guardian Outpost', 'Shadow Ridge', 'Falcon Fortress', 'Phoenix Armory', 'Havoc Point',
-    'Redhawk Barracks', 'Thunderhold Base', 'Stormwatch HQ', 'Silver Spear Depot', 'Raven Rock Command',
-    'Warhound Keep', 'Crossfire Station', 'Blackstone Bunker', 'Delta Sentinel', 'Legion Hold',
-    'Cerberus Outpost', 'Fort Resolute', 'Ironwing Command', 'Helix Forward Base', 'Striker Point'
-  ];
-  const handleChange = (event) => {
-    setSelectBase(event.target.value);
-
-  };
-  useEffect(() => {
-    const baseObj = user.role === "admin" ? fetchBase.find(item => item.basename === selectBase) : fetchBase;
-    if (baseObj !== base) {
-      setBase(baseObj || null);
-    }
-  }, [selectBase])
   const [selectedFilter, setSelectedFilter] = useState('from');
   const filterObject = {
-    from: baseNamesFilter,
-    to: baseNamesFilter,
-    movement: ["transfer in", "transfer out", "purchase"],
+    from: baseNames,
+    to: ["Stark Industries", "Shield Arms Dealer", "Tony Aerotech"],
     fromApproval: ["approved", "yet to approve", "cancelled"],
     toApproval: ["approved", "yet to approve", "rejected"],
     status: ["completed", "yet to approve", "cancelled", "rejected", "initiated", "approved"]
@@ -89,20 +67,28 @@ const Reports = () => {
     }));
 
   };
+  const navigate = useNavigate();
   useEffect(() => {
     console.log("Updated filterData:", filterData);
   }, [filterData]);
 
   useEffect(() => {
-    console.log(selectedData);
-  }, [selectedData])
+    if (approval && selectedData && key) {
+      handleReqAp(selectedData);
+    }
+  }, [approval, selectedData, key]);
 
 
 
 
   const [transaction, setTransaction] = useState([]);
   useEffect(() => {
-    setTransaction(base.transaction);
+
+    setTransaction(base.transaction.filter((item) => {
+      if (item.movement_type === 'purchase') {
+        return item
+      }
+    }));
 
   }, [base.transaction]);
 
@@ -129,14 +115,14 @@ const Reports = () => {
   const defaultDate = dayjs().format("YYYY-MM-DD");
 
 
-  const handleReqAp = (data, approval, key) => {
-    const reqApp = async () => {
+  const handleReqAp = (data) => {
+    const reqApp = async (data) => {
       const response = await axios.put("https://military-asset-be.onrender.com/base/updatetransactionfromrequesting", {
         id: data._id,
         requesting_base: data.requesting_base,
         receiving_base: data.receiving_base,
         [key]: approval,
-        basename: base.basename,
+        basename: user.base,
         remarks
       }, {
         headers: {
@@ -154,44 +140,23 @@ const Reports = () => {
           }
         }))
       }
-      if (response.data.message === "insufficient arms") {
-        alert("insufficient arms");
-      }
     }
-    reqApp(data, approval, key);
+    reqApp(data);
   }
 
   return (
     <div className='' >
+      <div className='text-right w-100'>
 
-      <div className='m-3 d-flex justify-content-around align-items-center'>
-        <div className='m-3 d-flex justify-content-around align-items-center'>
-          <div style={{ width: "100px" }}>Base Name :</div>
-          <div style={{ minWidth: "250px", maxWidth: "30vw" }}>
-            <Box sx={{ minWidth: 200 }}>
-              <FormControl fullWidth>
-                <InputLabel id="base-select-label">Select Base</InputLabel>
-                <Select
-                  labelId="base-select-label"
-                  id="base-select"
-                  value={selectBase}
-                  label="Select Base"
-                  onChange={handleChange}
-                >
-                  {baseNames.map((name, index) => (
-                    <MenuItem key={index} value={name}>
-                      {name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-
-          </div>
+        <div className='d-flex justify-content-end align-items-center'>
+          <div className="btn btn-primary m-3" onClick={() => navigate("/app/newpurchase")}>
+            <FontAwesomeIcon style={{ marginRight: "10px" }} icon={faPlus} />
+            New Purchase</div>
+          <div className="btn btn-warning m-3" onClick={() => setFilter(true)}>
+            <FontAwesomeIcon style={{ marginRight: "10px" }} icon={faFilter} />
+            Filter</div>
         </div>
-        <div className="btn btn-warning m-3" onClick={() => setFilter(true)}>
-          <FontAwesomeIcon style={{ marginRight: "10px" }} icon={faFilter} />
-          Filter</div>
+
       </div>
       <div className='d-flex justify-content-evenly align-items-center'>
         <table className='custom-table' style={{ tableLayout: "fixed", width: "100vw" }}>
@@ -222,16 +187,16 @@ const Reports = () => {
                   <td>{data.initiator}</td>
                   <td>{data.movement_type}</td>
                   <td>{((user.role === "base_commander" && user.base === data.requesting_base) || user.role === "admin") && (data.requesting_base_approval === "yet to approve") ? (
-                    <button className='btn btn-success' onClick={() => { handleReqAp(data, "approved", "requesting_base_approval") }}> approve</button>
+                    <button className='btn btn-success' onClick={() => { setSelectedData(data); setApproval("approved"); setKey("requesting_base_approval") }}> approve</button>
                   ) : ((user.role === "base_commander" && user.base === data.requesting_base) || user.role === "admin") && (data.requesting_base_approval === "approved" && data.receiving_base_approval === "yet to approve" && data.status !== "completed") ? (
-                    <button className='btn btn-danger' onClick={() => { handleReqAp(data, "cancelled", "requesting_base_approval") }}> Cancel</button>
+                    <button className='btn btn-danger' onClick={() => { setSelectedData(data); setApproval("cancelled"); setKey("requesting_base_approval") }}> Cancel</button>
                   ) :
                     data.requesting_base_approval}</td>
                   <td>{((user.role === "base_commander" && user.base === data.receiving_base) || user.role === "admin") && (data.receiving_base_approval === "yet to approve" && data.requesting_base_approval === "approved" && data.movement_type !== "purchase") ? (
                     <div className="d-flex justify-content-center align-items-center">
                       <div className='mx-1'><button className='btn btn-success' onClick={() => {
                         if (remarks) {
-                          handleReqAp(data, "approved", "receiving_base_approval")
+                          setSelectedData(data); setApproval("approved"); setKey("receiving_base_approval")
                         }
                         else {
                           alert("Please Give remarks");
@@ -239,7 +204,7 @@ const Reports = () => {
                       }}> A</button></div>
                       <div><button className='btn btn-danger' onClick={() => {
                         if (remarks) {
-                          handleReqAp(data, "rejected", "receiving_base_approval")
+                          setSelectedData(data); setApproval("rejected"); setKey("receiving_base_approval")
                         }
                         else {
                           alert("Please Give remarks");
@@ -251,12 +216,12 @@ const Reports = () => {
                     data.receiving_base_approval}</td>
                   <td>{data.approved_date}</td>
                   <td>{(data.movement_type === "transfer out" || user.role === 'admin') && data.receiving_base_approval === 'approved' && data.initiation_date === "-" ? (
-                    <div> <button className='btn btn-success' onClick={() => { handleReqAp(data, new Date().toISOString().split("T")[0], "initiation_date") }}> initiate</button>
+                    <div> <button className='btn btn-success' onClick={() => { setSelectedData(data); setApproval(new Date().toISOString().split("T")[0]); setKey("initiation_date") }}> initiate</button>
                     </div>
                   ) :
                     data.initiation_date}</td>
                   <td>{(data.movement_type === "transfer in" || user.role === "admin") && data.initiation_date !== "-" && data.completion_date === "-" ? (
-                    <div> <button className='btn btn-success' onClick={() => { handleReqAp(data, new Date().toISOString().split("T")[0], "completion_date") }}> Complete</button>
+                    <div> <button className='btn btn-success' onClick={() => { setSelectedData(data); setApproval(new Date().toISOString().split("T")[0]); setKey("completion_date") }}> Complete</button>
                     </div>
                   ) :
                     data.completion_date}</td>
@@ -373,10 +338,9 @@ const Reports = () => {
               <div className="d-flex justify-content-center w-100 " style={{ maxHeight: "70vh", border: "2px solid black" }}>
                 <div className='p-3 text-center w-50' style={{ background: "white", minHeight: "68vh", maxHeight: "70vh", borderRight: "2px solid black" }}>
                   <div className='p-2 ' onClick={() => setSelectedFilter('from')} style={{ background: selectedFilter === 'from' ? "#5A9C73" : null, borderRadius: "25px" }}>Req. Base</div>
-                  <div className='p-2' onClick={() => setSelectedFilter('to')} style={{ background: selectedFilter === 'to' ? "#5A9C73" : null, borderRadius: "25px" }}>Rec. Base</div>
+                  <div className='p-2' onClick={() => setSelectedFilter('to')} style={{ background: selectedFilter === 'to' ? "#5A9C73" : null, borderRadius: "25px" }}>Supplier</div>
                   <div className='p-2' onClick={() => setSelectedFilter('fromApproval')} style={{ background: selectedFilter === 'fromApproval' ? "#5A9C73" : null, borderRadius: "25px" }}>From Approval</div>
                   <div className='p-2' onClick={() => setSelectedFilter('toApproval')} style={{ background: selectedFilter === 'toApproval' ? "#5A9C73" : null, borderRadius: "25px" }}>To Approval</div>
-                  <div className='p-2' onClick={() => setSelectedFilter('movement')} style={{ background: selectedFilter === 'movement' ? "#5A9C73" : null, borderRadius: "25px" }}>Movement</div>
                   <div className='p-2' onClick={() => setSelectedFilter('initiationDate')} style={{ background: selectedFilter === 'initiationDate' ? "#5A9C73" : null, borderRadius: "25px" }}>Initiation Date</div>
                   <div className='p-2' onClick={() => setSelectedFilter('completionDate')} style={{ background: selectedFilter === 'completionDate' ? "#5A9C73" : null, borderRadius: "25px" }}>Completion Date</div>
                   <div className='p-2' onClick={() => setSelectedFilter('status')} style={{ background: selectedFilter === 'status' ? "#5A9C73" : null, borderRadius: "25px" }}>Status</div>

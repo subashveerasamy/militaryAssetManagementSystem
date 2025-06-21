@@ -12,11 +12,15 @@ import dayjs from 'dayjs';
 import BaseContext from '../Context/BaseContext.jsx';
 import UserContext from '../Context/UserContext.jsx';
 import axios from 'axios';
+import BaseDataContext from '../Context/BaseDataContext.jsx';
+import currentBaseContext from '../Context/CurrentBaseContect.jsx';
 
 const Transfer = () => {
   const { base, setBase } = React.useContext(BaseContext);
   const { user, setUser } = React.useContext(UserContext)
+  const { fetchBase, setFetchBase } = React.useContext(BaseDataContext);
   const [fromBase, setFromBase] = React.useState(user.base);
+  const { selectBase, setSelectBase } = React.useContext(currentBaseContext)
   const [toBase, setToBase] = React.useState('');
   const [movement, setMovement] = React.useState('');
 
@@ -81,6 +85,12 @@ const Transfer = () => {
   const handleChangeTo = (event) => {
     setToBase(event.target.value);
   };
+  React.useEffect(() => {
+    const baseObj = user.role === "admin" ? fetchBase.find(item => item.basename === fromBase) : fetchBase;
+    if (baseObj !== base) {
+      setBase(baseObj || null);
+    }
+  }, [fromBase])
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -90,7 +100,7 @@ const Transfer = () => {
       const transferItems = cards
         .map((item, index) => {
           if (quantity[index] > 0) {
-            const { image, ...filteredItem } = item; // Destructure to remove `image`
+            const { image, ...filteredItem } = item;
             return { ...filteredItem, quantity: quantity[index] };
           }
           return null;
@@ -98,7 +108,7 @@ const Transfer = () => {
         .filter(item => item !== null);
 
       const newTransaction = async () => {
-        const response = await axios.post("https://military-asset-be-1.onrender.com/base/newtransaction", {
+        const response = await axios.post("https://military-asset-be.onrender.com/base/newtransaction", {
           requesting_base: fromBase,
           receiving_base: toBase,
           movement_type: movement,
@@ -108,6 +118,14 @@ const Transfer = () => {
         });
         if (response.data.message === 'requested successfully') {
           setBase(response.data.base);
+          setFetchBase(fetchBase.map((item) => {
+            if (item.basename === base.basename) {
+              return response.data.base
+            }
+            else {
+              return item
+            }
+          }))
           setFromBase('');
           setToBase("");
           setMovement("");
@@ -224,8 +242,9 @@ const Transfer = () => {
 
                   <div className="card-body">
                     <h5 className="card-title text-center" id="multiline-ellipsis">{value.specific_name}</h5>
-                    {/* <p className="card-text text-center" >  {value.items} Left</p> */}
-                    {/* <button className="btn btn-primary" onClick={() => handleButtonFunc(index)}>{value.status}</button> */}
+                    {movement === "transfer out" ?
+                      (<p className="card-text text-center" >  {transOutItemLimit[index]?.unassigned || 0} Left</p>
+                      ) : null}
                     <div className="d-flex">
                       <div>Quantity for Transfer Out : </div>
                       <div className='ms-2 w-50' >
@@ -244,7 +263,7 @@ const Transfer = () => {
                             });
                           }}
                           min="0"
-                          max={movement === "transfer out" ? transOutItemLimit[index]?.unassigned || 0 : 100}
+                          max={movement === "transfer out" ? transOutItemLimit[index]?.unassigned || 0 : 1000000}
 
                         />
 

@@ -5,8 +5,8 @@ import App from './App.jsx'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Login from './Components/Login.jsx';
 import Dashboard from './Components/Dashboard.jsx';
-
 import Purchase from './Components/Purchase.jsx';
+import PurchaseHistory from './Components/PurchaseHistory.jsx';
 import Transfer from './Components/Transfer.jsx';
 import Assign from './Components/Assign.jsx';
 import Reports from './Components/Reports.jsx';
@@ -20,12 +20,12 @@ const router = createBrowserRouter([
         element: <Login />
     },
     {
-        path:"/resetpassword",
-        element:<ResetPassword/>
+        path: "/resetpassword",
+        element: <ResetPassword />
     },
     {
-        path:"/newpassword/:username",
-        element:<CreateNewPassword/>
+        path: "/newpassword/:username",
+        element: <CreateNewPassword />
     },
     {
         path: "/app",
@@ -37,6 +37,10 @@ const router = createBrowserRouter([
             },
             {
                 path: "purchase",
+                element: <PurchaseHistory />
+            },
+            {
+                path: "newpurchase",
                 element: <Purchase />
             },
             {

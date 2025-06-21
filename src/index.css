@@ -47,8 +47,8 @@
   color: white;
 }
 
-#loginUser input:focus ~ label,
-#loginUser input:not(:placeholder-shown) ~ label {
+#loginUser input:focus~label,
+#loginUser input:not(:placeholder-shown)~label {
   top: -5px;
   font-size: 12px;
   color: #fff;
